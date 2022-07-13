@@ -2,8 +2,8 @@
 AntiSabotage is a EXILED SCP:SL plugin which can protect the server from sabotaging. Also this plugin can track admin commands and send it using Discord webhooks.
 # Config
 ```DRS:
+AntiSabotage:
   # Whether or not this plugin is enabled
-  AntiSabotage:
   is_enabled: true
   # How many seconds will be the period of watching bans after starting banning
   ban_timeout: 20
