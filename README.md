@@ -1,5 +1,7 @@
 # AntiSabotage
 AntiSabotage is a EXILED SCP:SL plugin which can protect the server from sabotaging. Also this plugin can track admin commands and send it using Discord webhooks.
+
+[![Github All Releases](https://img.shields.io/github/downloads/Ficus-x/AntiSabotage/total.svg)]()
 # Config
 ```DRS:
 AntiSabotage:
