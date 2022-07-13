@@ -3,17 +3,18 @@ AntiSabotage is a EXILED SCP:SL plugin which can protect the server from sabotag
 # Config
 ```DRS:
   # Whether or not this plugin is enabled
+  AntiSabotage:
   is_enabled: true
   # How many seconds will be the period of watching bans after starting banning
   ban_timeout: 20
   # How many bans the administator can give. If they ban more that it their badge will be removed
   ban_limit: 5
   # How many seconds will be the period of watching kicks after starting kicking
-  kick_timeout: 5
+  kick_timeout: 20
   # How many kicks the administator can give. If they kick more that it their badge will be removed
-  kick_limit: 0
+  kick_limit: 5
   # URL of webhook
-  webhook_url: https://discord.com/api/webhooks/995758369954598912/3wbauXm4BOxK7Ejrnn9y-R9o80Sq5Ux4tx05qe3ei57bvcH9mvGsg2mrw0HZHIp8HmCX
+  webhook_url: ''
   # Roles or users to be pinged when sabotaging or using notified command
   pinged_people:
   - <@&981638149572821062>
