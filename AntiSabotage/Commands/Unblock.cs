@@ -9,7 +9,9 @@ namespace AntiSabotage.Commands
     public sealed class Unblock : ICommand
     {
         public string Command => "Unblock";
+        
         public string[] Aliases { get; } = Array.Empty<string>();
+        
         public string Description => "Unblocks the administrator from removing their badge.";
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)

@@ -9,23 +9,23 @@ namespace AntiSabotage
 {
     public sealed class Plugin : Plugin<Config, Translations>
     {
-        public override string Name => "AntiSabotage";
-
         public override string Author => "Ficus-x";
-
+        
+        public override string Name => "AntiSabotage";
+        
         public override string Prefix => Name;
 
-        public override Version Version { get; } = new(1, 0, 0);
+        public override Version Version { get; } = new (1, 0, 0);
 
-        public override Version RequiredExiledVersion { get; } = new(5, 0, 0);
+        public override Version RequiredExiledVersion { get; } = new (5, 0, 0);
 
         public static Plugin Instance { get; private set; }
 
-        private Handler _handler;
+        private PlayerHandler _playerHandler;
         
         private Harmony _harmony;
 
-        public readonly List<string> Abusers = new();
+        public readonly List<string> Abusers = new ();
 
         public override void OnEnabled()
         {
@@ -50,7 +50,7 @@ namespace AntiSabotage
             Instance = null;
             
             _harmony.UnpatchAll();
-            _handler = null;
+            _harmony = null;
             
             UnregisterEvents();
             
@@ -59,16 +59,14 @@ namespace AntiSabotage
 
         private void RegisterEvents()
         {
-            _handler = new Handler();
-
-            Player.ChangingGroup += _handler.OnChangingGroup;
+            _playerHandler = new PlayerHandler();
+            Player.ChangingGroup += _playerHandler.OnChangingGroup;
         }
 
         private void UnregisterEvents()
         {
-            Player.ChangingGroup -= _handler.OnChangingGroup;
-
-            _handler = null;
+            Player.ChangingGroup -= _playerHandler.OnChangingGroup;
+            _playerHandler = null;
         }
     }
 }

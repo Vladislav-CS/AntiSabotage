@@ -2,7 +2,7 @@
 
 namespace AntiSabotage
 {
-    public class Handler
+    public class PlayerHandler
     {
         public void OnChangingGroup(ChangingGroupEventArgs ev)
         {

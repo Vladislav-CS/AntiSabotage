@@ -118,7 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Unblock.cs" />
-    <Compile Include="Handler.cs" />
+    <Compile Include="PlayerHandler.cs" />
     <Compile Include="Patches\RemoteAdminCommand.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

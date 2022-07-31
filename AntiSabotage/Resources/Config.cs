@@ -24,13 +24,13 @@ namespace AntiSabotage.Resources
         public string WebhookUrl { get; set; } = string.Empty;
 
         [Description("Roles or users to be pinged when sabotaging or using notified command")]
-        public List<string> PingedPeople { get; set; } = new()
+        public List<string> PingedPeople { get; set; } = new ()
         {
             "<@&981638149572821062>", "<@510752968551825409>"
         };
         
         [Description("Commands to be notified using webhook")]
-        public List<string> NotifiedCommands { get; set; } = new()
+        public List<string> NotifiedCommands { get; set; } = new ()
         {
             "noclip"
         };

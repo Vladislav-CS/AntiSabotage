@@ -15,15 +15,15 @@ namespace AntiSabotage.Patches
     [HarmonyPatch(typeof(CommandProcessor), nameof(CommandProcessor.ProcessQuery))]
     public static class RemoteAdminCommand
     {
-        public static readonly IWebhook Webhook = WebhookProvider.CreateStaticWebhook(Plugin.Instance.Config.WebhookUrl);
+        private static readonly IWebhook Webhook = WebhookProvider.CreateStaticWebhook(Plugin.Instance.Config.WebhookUrl);
         
-        public static readonly EmbedBuilder EmbedBuilder = ConstructorProvider.GetEmbedBuilder();
-        public static readonly EmbedFieldBuilder FieldBuilder = ConstructorProvider.GetEmbedFieldBuilder();
-        public static readonly MessageBuilder MessageBuilder = ConstructorProvider.GetMessageBuilder();
-        public static readonly MessageMentionBuilder MentionBuilder = ConstructorProvider.GetMentionBuilder();
+        private static readonly EmbedBuilder EmbedBuilder = ConstructorProvider.GetEmbedBuilder();
+        private static readonly EmbedFieldBuilder FieldBuilder = ConstructorProvider.GetEmbedFieldBuilder();
+        private static readonly MessageBuilder MessageBuilder = ConstructorProvider.GetMessageBuilder();
+        private static readonly MessageMentionBuilder MentionBuilder = ConstructorProvider.GetMentionBuilder();
 
-        public static readonly Dictionary<string, byte> BanCounter = new();
-        public static readonly Dictionary<string, byte> KickCounter = new();
+        private static readonly Dictionary<string, byte> BanCounter = new();
+        private static readonly Dictionary<string, byte> KickCounter = new();
 
         public static bool Prefix(string q, CommandSender sender)
         {
@@ -35,7 +35,7 @@ namespace AntiSabotage.Patches
             return CheckBans(query, commandSender) && CheckKicks(query, commandSender);
         }
 
-        public static bool CheckBans(string[] query, Player sender)
+        private static bool CheckBans(string[] query, Player sender)
         {
             if (!query[0].ToLower().Equals("ban") || query[2].Equals("0"))
                 return true;
@@ -69,7 +69,7 @@ namespace AntiSabotage.Patches
             return true;
         }
 
-        public static bool CheckKicks(string[] query, Player sender)
+        private static bool CheckKicks(string[] query, Player sender)
         {
             if (!query[0].ToLower().Equals("ban") || !query[2].Equals("0"))
                 return true;
@@ -102,7 +102,7 @@ namespace AntiSabotage.Patches
             return true;
         }
 
-        public static void CheckNotifiedCommand(Player sender, string[] command)
+        private static void CheckNotifiedCommand(Player sender, string[] command)
         {
             if (Plugin.Instance.Config.NotifiedCommands.Select(notifiedCommand => notifiedCommand.ToLower()).Contains(command[0].ToLower()))
                 Webhook.SendMessage(PrepareMessageForNotifiedCommand(sender, command)).Queue((_, isSuccessful) =>
@@ -112,7 +112,7 @@ namespace AntiSabotage.Patches
                 });
         }
         
-        public static IMessage PrepareMessageForSabotaging(Player sender, string command, int amount)
+        private static IMessage PrepareMessageForSabotaging(Player sender, string command, int amount)
         {
             ResetBuilders();
 
@@ -150,7 +150,7 @@ namespace AntiSabotage.Patches
             return MessageBuilder.Build();
         }
         
-        public static IMessage PrepareMessageForNotifiedCommand(Player sender, string[] command)
+        private static IMessage PrepareMessageForNotifiedCommand(Player sender, string[] command)
         {
             ResetBuilders();
             
@@ -186,7 +186,7 @@ namespace AntiSabotage.Patches
             return MessageBuilder.Build();
         }
 
-        public static void ResetBuilders()
+        private static void ResetBuilders()
         {
             EmbedBuilder.Reset();
             FieldBuilder.Reset();
