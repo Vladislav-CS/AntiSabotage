@@ -15,7 +15,7 @@ namespace AntiSabotage
         
         public override string Prefix => Name;
 
-        public override Version Version { get; } = new (1, 0, 0);
+        public override Version Version { get; } = new (1, 0, 1);
 
         public override Version RequiredExiledVersion { get; } = new (5, 0, 0);
 
