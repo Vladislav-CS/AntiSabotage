@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AntiSabotage.Enums;
 using DSharp4Webhook.Core;
 using DSharp4Webhook.Core.Constructor;
 using DSharp4Webhook.Util;
@@ -24,6 +25,9 @@ namespace AntiSabotage.Patches
 
         private static readonly Dictionary<string, byte> BanCounter = new();
         private static readonly Dictionary<string, byte> KickCounter = new();
+
+        private static CoroutineHandle _coroutineBan;
+        private static CoroutineHandle _coroutineKick;
 
         public static bool Prefix(string q, CommandSender sender)
         {
@@ -49,8 +53,11 @@ namespace AntiSabotage.Patches
                 BanCounter.Add(sender.UserId, 0);
 
             BanCounter[sender.UserId] += (byte) banCount;
-            
-            Timing.CallDelayed(Plugin.Instance.Config.BanTimeout, () => { BanCounter[sender.UserId] = 0; });
+
+            if (_coroutineBan.IsRunning)
+                Timing.KillCoroutines(_coroutineBan);
+
+            _coroutineBan = Timing.RunCoroutine(ResetTimer(Plugin.Instance.Config.BanTimeout, sender.UserId, PunishmentType.Ban));
             
             if (BanCounter[sender.UserId] > Plugin.Instance.Config.BanLimit)
             {
@@ -58,7 +65,7 @@ namespace AntiSabotage.Patches
                 Plugin.Instance.Abusers.Add(sender.UserId);
                 
                 sender.Broadcast(15, Plugin.Instance.Translation.NotifiedBroadcast, shouldClearPrevious: true);
-                Webhook.SendMessage(PrepareMessageForSabotaging(sender, "ban", BanCounter[sender.UserId])).Queue((_, isSuccessful) =>
+                Webhook.SendMessage(PrepareMessageForSabotaging(sender, PunishmentType.Ban, BanCounter[sender.UserId])).Queue((_, isSuccessful) =>
                 {
                     if (!isSuccessful)
                         Log.Error("Error while sending a message");
@@ -84,7 +91,10 @@ namespace AntiSabotage.Patches
 
             KickCounter[sender.UserId] += (byte) kickCount;
 
-            Timing.CallDelayed(Plugin.Instance.Config.KickTimeout, () => { KickCounter[sender.UserId] = 0; });
+            if (_coroutineKick.IsRunning)
+                Timing.KillCoroutines(_coroutineKick);
+
+            _coroutineKick = Timing.RunCoroutine(ResetTimer(Plugin.Instance.Config.KickLimit, sender.UserId, PunishmentType.Kick));
             
             if (KickCounter[sender.UserId] > Plugin.Instance.Config.KickLimit)
             {
@@ -92,7 +102,7 @@ namespace AntiSabotage.Patches
                 Plugin.Instance.Abusers.Add(sender.UserId);
                 
                 sender.Broadcast(15, Plugin.Instance.Translation.NotifiedBroadcast, shouldClearPrevious: true);
-                Webhook.SendMessage(PrepareMessageForSabotaging(sender, "kick", KickCounter[sender.UserId])).Queue((_, isSuccessful) =>
+                Webhook.SendMessage(PrepareMessageForSabotaging(sender, PunishmentType.Kick, KickCounter[sender.UserId])).Queue((_, isSuccessful) =>
                 {
                     if (!isSuccessful)
                         Log.Error("Error while sending a message");
@@ -102,6 +112,24 @@ namespace AntiSabotage.Patches
             return true;
         }
 
+        private static IEnumerator<float> ResetTimer(float time, string userId, PunishmentType type)
+        {
+            yield return Timing.WaitForSeconds(time);
+            
+            if (Player.Get(userId) is null)
+                yield break;
+            
+            switch (type)
+            {
+                case PunishmentType.Ban:
+                    BanCounter[userId] = 0;
+                    break;
+                case PunishmentType.Kick:
+                    KickCounter[userId] = 0;
+                    break;
+            }
+        }
+        
         private static void CheckNotifiedCommand(Player sender, string[] command)
         {
             if (Plugin.Instance.Config.NotifiedCommands.Select(notifiedCommand => notifiedCommand.ToLower()).Contains(command[0].ToLower()))
@@ -112,7 +140,7 @@ namespace AntiSabotage.Patches
                 });
         }
         
-        private static IMessage PrepareMessageForSabotaging(Player sender, string command, int amount)
+        private static IMessage PrepareMessageForSabotaging(Player sender, PunishmentType command, int amount)
         {
             ResetBuilders();
 
@@ -127,7 +155,7 @@ namespace AntiSabotage.Patches
             EmbedBuilder.AddField(FieldBuilder.Build());
             
             FieldBuilder.Name = Plugin.Instance.Translation.Command;
-            FieldBuilder.Value = command;
+            FieldBuilder.Value = command.ToString();
             EmbedBuilder.AddField(FieldBuilder.Build());
             
             FieldBuilder.Name = Plugin.Instance.Translation.AmountAffected;
