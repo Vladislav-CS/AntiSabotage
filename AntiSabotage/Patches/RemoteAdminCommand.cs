@@ -17,7 +17,7 @@ namespace AntiSabotage.Patches
     public static class RemoteAdminCommand
     {
         private static readonly IWebhook Webhook = WebhookProvider.CreateStaticWebhook(Plugin.Instance.Config.WebhookUrl);
-        
+
         private static readonly EmbedBuilder EmbedBuilder = ConstructorProvider.GetEmbedBuilder();
         private static readonly EmbedFieldBuilder FieldBuilder = ConstructorProvider.GetEmbedFieldBuilder();
         private static readonly MessageBuilder MessageBuilder = ConstructorProvider.GetMessageBuilder();
@@ -33,9 +33,9 @@ namespace AntiSabotage.Patches
         {
             string[] query = q.Split(' ');
             Player commandSender = Player.Get(sender);
-            
+
             CheckNotifiedCommand(commandSender, query);
-            
+
             return CheckBans(query, commandSender) && CheckKicks(query, commandSender);
         }
 
@@ -46,7 +46,7 @@ namespace AntiSabotage.Patches
 
             if (sender == null || sender.AuthenticationType == AuthenticationType.Northwood)
                 return true;
-            
+
             int banCount = query[1].Split('.').Length - 1;
 
             if (!BanCounter.ContainsKey(sender.UserId))
@@ -58,18 +58,19 @@ namespace AntiSabotage.Patches
                 Timing.KillCoroutines(_coroutineBan);
 
             _coroutineBan = Timing.RunCoroutine(ResetTimer(Plugin.Instance.Config.BanTimeout, sender.UserId, PunishmentType.Ban));
-            
+
             if (BanCounter[sender.UserId] > Plugin.Instance.Config.BanLimit)
             {
                 sender.Group = new UserGroup();
                 Plugin.Instance.Abusers.Add(sender.UserId);
-                
+
                 sender.Broadcast(15, Plugin.Instance.Translation.NotifiedBroadcast, shouldClearPrevious: true);
-                Webhook.SendMessage(PrepareMessageForSabotaging(sender, PunishmentType.Ban, BanCounter[sender.UserId])).Queue((_, isSuccessful) =>
-                {
-                    if (!isSuccessful)
-                        Log.Error("Error while sending a message");
-                });
+                Webhook.SendMessage(PrepareMessageForSabotaging(sender, PunishmentType.Ban, BanCounter[sender.UserId]))
+                    .Queue((_, isSuccessful) =>
+                    {
+                        if (!isSuccessful)
+                            Log.Error("Error while sending a message");
+                    });
                 return false;
             }
 
@@ -83,7 +84,7 @@ namespace AntiSabotage.Patches
 
             if (sender == null || sender.AuthenticationType == AuthenticationType.Northwood)
                 return true;
-            
+
             int kickCount = query[1].Split('.').Length - 1;
 
             if (!KickCounter.ContainsKey(sender.UserId))
@@ -95,30 +96,33 @@ namespace AntiSabotage.Patches
                 Timing.KillCoroutines(_coroutineKick);
 
             _coroutineKick = Timing.RunCoroutine(ResetTimer(Plugin.Instance.Config.KickLimit, sender.UserId, PunishmentType.Kick));
-            
+
             if (KickCounter[sender.UserId] > Plugin.Instance.Config.KickLimit)
             {
                 sender.Group = new UserGroup();
                 Plugin.Instance.Abusers.Add(sender.UserId);
-                
+
                 sender.Broadcast(15, Plugin.Instance.Translation.NotifiedBroadcast, shouldClearPrevious: true);
-                Webhook.SendMessage(PrepareMessageForSabotaging(sender, PunishmentType.Kick, KickCounter[sender.UserId])).Queue((_, isSuccessful) =>
-                {
-                    if (!isSuccessful)
-                        Log.Error("Error while sending a message");
-                });
+                Webhook.SendMessage(
+                    PrepareMessageForSabotaging(sender, PunishmentType.Kick, KickCounter[sender.UserId])).Queue(
+                    (_, isSuccessful) =>
+                    {
+                        if (!isSuccessful)
+                            Log.Error("Error while sending a message");
+                    });
                 return false;
             }
+
             return true;
         }
 
         private static IEnumerator<float> ResetTimer(float time, string userId, PunishmentType type)
         {
             yield return Timing.WaitForSeconds(time);
-            
+
             if (Player.Get(userId) is null)
                 yield break;
-            
+
             switch (type)
             {
                 case PunishmentType.Ban:
@@ -129,7 +133,7 @@ namespace AntiSabotage.Patches
                     break;
             }
         }
-        
+
         private static void CheckNotifiedCommand(Player sender, string[] command)
         {
             if (Plugin.Instance.Config.NotifiedCommands.Select(notifiedCommand => notifiedCommand.ToLower()).Contains(command[0].ToLower()))
@@ -139,29 +143,29 @@ namespace AntiSabotage.Patches
                         Log.Error("Error while sending a message");
                 });
         }
-        
+
         private static IMessage PrepareMessageForSabotaging(Player sender, PunishmentType command, int amount)
         {
             ResetBuilders();
 
             FieldBuilder.Inline = false;
-            
+
             FieldBuilder.Name = Plugin.Instance.Translation.Administrator;
             FieldBuilder.Value = $"{sender.Nickname} ({sender.UserId})";
             EmbedBuilder.AddField(FieldBuilder.Build());
-            
+
             FieldBuilder.Name = Plugin.Instance.Translation.Port;
             FieldBuilder.Value = Server.Port.ToString();
             EmbedBuilder.AddField(FieldBuilder.Build());
-            
+
             FieldBuilder.Name = Plugin.Instance.Translation.Command;
             FieldBuilder.Value = command.ToString();
             EmbedBuilder.AddField(FieldBuilder.Build());
-            
+
             FieldBuilder.Name = Plugin.Instance.Translation.AmountAffected;
             FieldBuilder.Value = amount.ToString();
             EmbedBuilder.AddField(FieldBuilder.Build());
-            
+
             EmbedBuilder.Title = Plugin.Instance.Translation.EmbedTitle;
             EmbedBuilder.Append(Plugin.Instance.Translation.AttentionText.Replace("%AdminID%", sender.UserId));
 
@@ -170,46 +174,46 @@ namespace AntiSabotage.Patches
 
             MessageBuilder.Append(string.Join(", ", Plugin.Instance.Config.PingedPeople));
             MessageBuilder.AddEmbed(EmbedBuilder.Build());
-            
+
             MentionBuilder.Roles = Plugin.Instance.Config.PingedPeople.ToHashSet();
             MentionBuilder.AllowedMention = AllowedMention.ROLES | AllowedMention.USERS;
-            
+
             MessageBuilder.SetMessageMention(MentionBuilder.Build());
             return MessageBuilder.Build();
         }
-        
+
         private static IMessage PrepareMessageForNotifiedCommand(Player sender, string[] command)
         {
             ResetBuilders();
-            
+
             FieldBuilder.Inline = false;
-            
+
             FieldBuilder.Name = Plugin.Instance.Translation.Administrator;
             FieldBuilder.Value = $"{sender.Nickname} ({sender.UserId})";
             EmbedBuilder.AddField(FieldBuilder.Build());
-            
+
             FieldBuilder.Name = Plugin.Instance.Translation.Command;
             FieldBuilder.Value = $"```{string.Join(" ", command)}```";
             EmbedBuilder.AddField(FieldBuilder.Build());
-            
+
             FieldBuilder.Name = Plugin.Instance.Translation.Port;
             FieldBuilder.Value = Server.Port.ToString();
             EmbedBuilder.AddField(FieldBuilder.Build());
-            
+
             EmbedBuilder.Title = Plugin.Instance.Translation.EmbedTitle;
             EmbedBuilder.Append(Plugin.Instance.Translation.NotifiedCommandText);
 
             EmbedBuilder.Color = (uint?) ColorUtil.FromHex(Plugin.Instance.Config.EmbedColour);
             EmbedBuilder.Timestamp = DateTimeOffset.UtcNow;
-            
+
             if (Plugin.Instance.Config.ShouldNotifiedCommandPingedPeople)
                 MessageBuilder.Append(string.Join(", ", Plugin.Instance.Config.PingedPeople));
-            
+
             MessageBuilder.AddEmbed(EmbedBuilder.Build());
-            
+
             MentionBuilder.Roles = Plugin.Instance.Config.PingedPeople.ToHashSet();
             MentionBuilder.AllowedMention = AllowedMention.ROLES | AllowedMention.USERS;
-            
+
             MessageBuilder.SetMessageMention(MentionBuilder.Build());
             return MessageBuilder.Build();
         }

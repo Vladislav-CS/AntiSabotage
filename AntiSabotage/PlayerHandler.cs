@@ -1,4 +1,4 @@
-﻿using Exiled.Events.EventArgs;
+﻿using Exiled.Events.EventArgs.Player;
 
 namespace AntiSabotage
 {

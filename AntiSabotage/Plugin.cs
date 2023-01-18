@@ -7,12 +7,12 @@ using Player = Exiled.Events.Handlers.Player;
 
 namespace AntiSabotage
 {
-    public sealed class Plugin : Plugin<Config, Translations>
+    public sealed class Plugin : Plugin<Config, Resources.Translations>
     {
         public override string Author => "Ficus-x";
-        
+
         public override string Name => "AntiSabotage";
-        
+
         public override string Prefix => Name;
 
         public override Version Version { get; } = new (1, 1, 1);
@@ -22,7 +22,7 @@ namespace AntiSabotage
         public static Plugin Instance { get; private set; }
 
         private PlayerHandler _playerHandler;
-        
+
         private Harmony _harmony;
 
         public readonly List<string> Abusers = new ();
@@ -34,7 +34,7 @@ namespace AntiSabotage
                 Log.Error("The webhook URL must be set for this plugin to launch!");
                 return;
             }
-            
+
             Instance = this;
 
             _harmony = new Harmony($"AntiSabotage.{DateTime.Now.Ticks}");
@@ -48,12 +48,12 @@ namespace AntiSabotage
         public override void OnDisabled()
         {
             Instance = null;
-            
+
             _harmony.UnpatchAll(_harmony.Id);
             _harmony = null;
-            
+
             UnregisterEvents();
-            
+
             base.OnDisabled();
         }
 
